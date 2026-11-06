@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{# Home page: hero, three "how it works" steps, four feature cards, final call to action. #}
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Industry Project</div>
+    <h1>Know exactly how<br><span>placement-ready</span> you are</h1>
+    <p>Track your skills week by week, find gaps before companies do, and scan your resume against any job description, all in one place.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="/profile" class="btn btn-primary btn-lg"><i class="ti ti-user-check"></i> Build My Profile</a>
+      <a href="/ats" class="btn btn-outline btn-lg"><i class="ti ti-file-search"></i> ATS Scanner</a>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="text-center mb-2">
+      <div class="section-title">How it works</div>
+      <div class="section-sub">Three steps to know where you stand</div>
+    </div>
+    <div class="grid-3">
+      <div class="card card-sm text-center">
+        <div style="font-size:32px;margin-bottom:12px;color:var(--indigo)"><i class="ti ti-sliders"></i></div>
+        <div style="font-weight:600;margin-bottom:6px">Rate your skills</div>
+        <div class="text-muted" style="font-size:13px">Fill in your skill levels across 10 key areas: Python, SQL, DSA, Communication, and more. Takes 2 minutes.</div>
+      </div>
+      <div class="card card-sm text-center">
+        <div style="font-size:32px;margin-bottom:12px;color:var(--indigo)"><i class="ti ti-chart-radar"></i></div>
+        <div style="font-weight:600;margin-bottom:6px">See your gap analysis</div>
+        <div class="text-muted" style="font-size:13px">Instantly see where you stand against the skill levels expected for your chosen role. Charts make the gaps easy to spot.</div>
+      </div>
+      <div class="card card-sm text-center">
+        <div style="font-size:32px;margin-bottom:12px;color:var(--indigo)"><i class="ti ti-file-search"></i></div>
+        <div style="font-weight:600;margin-bottom:6px">Scan your resume</div>
+        <div class="text-muted" style="font-size:13px">Paste any job description and your resume. The scanner shows which keywords are missing and offers ready-to-paste sentences for common skills.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="grid-2 mt-2">
+    <div class="card">
+      <div style="font-size:22px;color:var(--indigo);margin-bottom:10px"><i class="ti ti-trending-up"></i></div>
+      <div style="font-weight:600;margin-bottom:6px">Week-by-week progress</div>
+      <div class="text-muted" style="font-size:13px;line-height:1.7">Update your profile every week. A line chart plots your readiness score over time so you can see whether you are improving.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;color:var(--indigo);margin-bottom:10px"><i class="ti ti-briefcase"></i></div>
+      <div style="font-weight:600;margin-bottom:6px">Six target roles</div>
+      <div class="text-muted" style="font-size:13px;line-height:1.7">Choose from Data Analyst, Data Scientist, Business Analyst, Data Engineer, Software Developer or ML Engineer. Each role has its own skill benchmarks.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;color:var(--indigo);margin-bottom:10px"><i class="ti ti-target-arrow"></i></div>
+      <div style="font-weight:600;margin-bottom:6px">Prioritised action list</div>
+      <div class="text-muted" style="font-size:13px;line-height:1.7">Your biggest skill gaps are ranked first, each with a concrete tip on what to practise this week.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:22px;color:var(--indigo);margin-bottom:10px"><i class="ti ti-users"></i></div>
+      <div style="font-weight:600;margin-bottom:6px">Placement cell dashboard</div>
+      <div class="text-muted" style="font-size:13px;line-height:1.7">Coordinators see every student ranked by readiness, with Ready, Warning and Critical badges, so they know who needs help early.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="text-center" style="padding:2rem 0">
+    <div class="section-title mb-1">Ready to find out where you stand?</div>
+    <div class="section-sub mb-2">It takes about two minutes to fill in your profile.</div>
+    <a href="/profile" class="btn btn-primary btn-lg"><i class="ti ti-arrow-right"></i> Build My Profile</a>
+  </div>
+
+</div>
+{% endblock %}

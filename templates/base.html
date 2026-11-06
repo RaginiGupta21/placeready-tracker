@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{# base.html: the master page. Every other page "extends" it, so the navbar,
+   footer and CSS link are written once and shared. Each page fills the blocks below.
+   (Jinja comments like this one are NOT sent to the browser.) #}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Home{% endblock %} | PlaceReady</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {# Chart.js and the icon font load from a CDN, so the first load needs internet. #}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="nav-brand"><span class="dot"></span>PlaceReady</a>
+    <ul class="nav-links">
+      <li><a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Home</a></li>
+      <li><a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}"><i class="ti ti-user"></i> My Profile</a></li>
+      <li><a href="/ats" class="{% if request.url.path == '/ats' %}active{% endif %}"><i class="ti ti-file-search"></i> ATS Scanner</a></li>
+      <li><a href="/admin" class="{% if request.url.path == '/admin' %}active{% endif %}"><i class="ti ti-layout-dashboard"></i> Admin</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer style="text-align:center;padding:2rem;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:3rem;">
+    PlaceReady &nbsp;&middot;&nbsp; Placement Readiness Tracker &nbsp;&middot;&nbsp; BSc Data Science, Semester 3 Industry Project
+  </footer>
+
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

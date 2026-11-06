@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ student.name }}{% endblock %}
+
+{% block content %}
+{# dashboard.html: one student's results. main.py passes: student, history, gap_data, priority, gap_json, history_json. #}
+<div class="page">
+
+  <div class="mb-2" style="display:flex;justify-content:space-between;align-items:center">
+    <a href="/profile" class="btn btn-outline" style="font-size:13px;padding:6px 14px">
+      <i class="ti ti-arrow-left"></i> Update Profile
+    </a>
+    <a href="/admin" class="btn btn-outline" style="font-size:13px;padding:6px 14px">
+      <i class="ti ti-layout-dashboard"></i> Admin View
+    </a>
+  </div>
+
+  <div class="mb-3">
+    <div class="section-title">{{ student.name }}'s Dashboard</div>
+    <div class="section-sub">
+      Target role: <strong style="color:var(--text)">{{ student.target_role }}</strong>
+      &nbsp;·&nbsp; {{ student.branch }} &nbsp;·&nbsp; {{ student.year }}
+    </div>
+  </div>
+
+  {# TOP ROW: Score + Radar #}
+  <div class="grid-2 mb-2">
+
+    {# Score Card #}
+    <div class="card" style="display:flex;flex-direction:column;
+                              align-items:center;justify-content:center;
+                              min-height:260px">
+      <div style="font-size:13px;color:var(--text-2);
+                  text-transform:uppercase;letter-spacing:.06em;
+                  font-weight:600;margin-bottom:12px">Readiness Score</div>
+
+      {% set score = student.readiness_score %}
+      {% if score >= 70 %}
+        {% set clr = '#22C55E' %}{% set lbl = 'Ready' %}
+      {% elif score >= 40 %}
+        {% set clr = '#F59E0B' %}{% set lbl = 'Warning' %}
+      {% else %}
+        {% set clr = '#EF4444' %}{% set lbl = 'Critical' %}
+      {% endif %}
+
+      <div class="score-number" style="color:{{ clr }}">{{ score }}%</div>
+      <div class="score-label {{ lbl | lower }}">{{ lbl }}</div>
+
+      <div class="text-muted mt-2" style="font-size:12px;text-align:center;
+                                          max-width:200px;line-height:1.6">
+        {% if score >= 70 %}You are placement-ready. Keep practising!
+        {% elif score >= 40 %}Getting there. Focus on priority actions below.
+        {% else %}Accelerate preparation. Start with the top action now.
+        {% endif %}
+      </div>
+
+      <div class="stats-row mt-2 w-full">
+        <div class="stat-card">
+          <div class="stat-value">{{ student.python }}</div>
+          <div class="stat-label">Python</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ student.sql }}</div>
+          <div class="stat-label">SQL</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ student.mocks }}</div>
+          <div class="stat-label">Mocks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ student.problems }}</div>
+          <div class="stat-label">Problems</div>
+        </div>
+      </div>
+    </div>
+
+    {# Radar Chart #}
+    <div class="card">
+      <div style="font-weight:600;font-size:14px;margin-bottom:12px;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-chart-radar" style="color:var(--indigo)"></i>
+        Skill Radar
+        <span style="font-size:12px;color:var(--text-2);font-weight:400">
+          blue = you · grey = required
+        </span>
+      </div>
+      <div class="chart-box"><canvas id="radarChart"></canvas></div>
+    </div>
+
+  </div>
+
+  {# SECOND ROW: Gap Bars + Line Chart #}
+  <div class="grid-2 mb-2">
+
+    {# Gap Bars #}
+    <div class="card">
+      <div style="font-weight:600;font-size:14px;margin-bottom:12px;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-chart-bar" style="color:var(--indigo)"></i>
+        Skill Gap Analysis
+      </div>
+      {% for gap in gap_data %}
+      <div class="gap-row">
+        <div class="gap-label">{{ gap.label }}</div>
+        <div class="gap-bars">
+          <div class="bar-track">
+            <div class="bar-fill bar-yours"
+                 style="width:{{ (gap.your_score / 5 * 100) | int }}%"></div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-required"
+                 style="width:{{ (gap.required / 5 * 100) | int }}%"></div>
+          </div>
+        </div>
+        <div class="gap-scores">
+          <span style="color:var(--indigo)">{{ gap.your_score }}</span>/
+          <span style="color:var(--muted)">{{ gap.required }}</span>
+        </div>
+        <div>
+          {% if gap.status == 'good' %}<span class="badge badge-good">✓</span>
+          {% elif gap.status == 'warning' %}<span class="badge badge-warning">!</span>
+          {% else %}<span class="badge badge-critical">✗</span>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <div class="text-muted mt-1" style="font-size:12px">
+        <span style="color:var(--indigo)">■</span> Your score &nbsp;
+        <span style="color:var(--muted)">■</span> Required
+      </div>
+    </div>
+
+    {# Line Chart (Time Series) #}
+    <div class="card">
+      <div style="font-weight:600;font-size:14px;margin-bottom:12px;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-trending-up" style="color:var(--indigo)"></i>
+        Weekly Progress
+      </div>
+      <div class="chart-box"><canvas id="lineChart"></canvas></div>
+      {% if history | length <= 1 %}
+      <div class="alert alert-info mt-1" style="font-size:12px">
+        Update your profile next week to see your growth trend here.
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  {# Priority Actions #}
+  <div class="card mb-3">
+    <div style="font-weight:600;font-size:15px;margin-bottom:4px;
+                display:flex;align-items:center;gap:8px">
+      <i class="ti ti-target-arrow" style="color:var(--indigo)"></i>
+      Top Priority Actions This Week
+    </div>
+    <div class="text-muted mb-2" style="font-size:13px">
+      Ranked by impact - fixing the top item improves your score the most.
+    </div>
+    {% if priority %}
+      {% for action in priority %}
+      <div class="action-card {{ action.urgency }}">
+        <div class="action-skill">
+          {% if action.urgency == 'critical' %}🔴
+          {% elif action.urgency == 'warning' %}🟡
+          {% else %}🟢{% endif %}
+          {{ action.skill }}
+          <span class="badge badge-{{ action.urgency }}" style="font-size:10px">
+            {{ action.from }}/5 → {{ action.to }}/5 needed
+          </span>
+        </div>
+        <div class="action-tip">{{ action.tip }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-success">
+        🎉 You meet all requirements for {{ student.target_role }}!
+      </div>
+    {% endif %}
+  </div>
+
+  {# ATS CTA #}
+  <div class="card" style="border-color:var(--indigo);
+                            background:rgba(79,70,229,0.06);text-align:center">
+    <div style="font-size:22px;color:var(--indigo);margin-bottom:8px">
+      <i class="ti ti-file-search"></i>
+    </div>
+    <div style="font-weight:600;margin-bottom:6px">
+      Now scan your resume against a real job description
+    </div>
+    <div class="text-muted mb-2" style="font-size:13px">
+      Many employers use ATS software to filter resumes before a person reads them.
+    </div>
+    <a href="/ats" class="btn btn-primary">
+      <i class="ti ti-arrow-right"></i> Go to ATS Scanner
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+{# Chart.js code. main.py turns Python data into JSON text; JSON is valid JavaScript, so it can be pasted straight in. #}
+<script>
+// Parse the JSON strings that main.py sent us
+const gapData    = {{ gap_json | safe }};
+const histData   = {{ history_json | safe }};
+
+// Extract arrays for Chart.js
+const labels     = gapData.map(g => g.label);
+const yourScores = gapData.map(g => g.your_score);
+const required   = gapData.map(g => g.required);
+const histDates  = histData.map(h => h.log_date);
+const histScores = histData.map(h => h.readiness_score);
+
+// CHART 1 - Radar Chart
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+new Chart(radarCtx, {
+  type: 'radar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Your Skills',
+        data: yourScores,
+        backgroundColor: 'rgba(79,70,229,0.2)',
+        borderColor: 'rgba(79,70,229,1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(79,70,229,1)',
+      },
+      {
+        label: 'Required',
+        data: required,
+        backgroundColor: 'rgba(100,116,139,0.1)',
+        borderColor: 'rgba(100,116,139,0.6)',
+        borderWidth: 1,
+        borderDash: [4,4],
+        pointBackgroundColor: 'rgba(100,116,139,0.6)',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#94A3B8', font: { size: 12 } } } },
+    scales: {
+      r: {
+        min: 0, max: 5,
+        ticks: { stepSize: 1, color: '#64748B', backdropColor: 'transparent' },
+        pointLabels: { color: '#94A3B8', font: { size: 11 } },
+        grid: { color: 'rgba(45,63,87,0.8)' },
+        angleLines: { color: 'rgba(45,63,87,0.8)' },
+      }
+    }
+  }
+});
+
+// CHART 2 - Line Chart (Time Series)
+const lineCtx = document.getElementById('lineChart').getContext('2d');
+new Chart(lineCtx, {
+  type: 'line',
+  data: {
+    labels: histDates,
+    datasets: [{
+      label: 'Readiness Score',
+      data: histScores,
+      borderColor: 'rgba(79,70,229,1)',
+      backgroundColor: 'rgba(79,70,229,0.1)',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: 'rgba(79,70,229,1)',
+      pointRadius: 5,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#94A3B8', font: { size: 12 } } } },
+    scales: {
+      x: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: 'rgba(45,63,87,0.5)' } },
+      y: { min: 0, max: 100, ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: 'rgba(45,63,87,0.5)' } }
+    }
+  }
+});
+</script>
+{% endblock %}

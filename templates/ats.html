@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% block title %}ATS Resume Scanner{% endblock %}
+
+{% block content %}
+<div class="page">
+
+  <div class="mb-2">
+    <a href="/" class="btn btn-outline" style="font-size:13px;padding:6px 14px">
+      <i class="ti ti-arrow-left"></i> Back
+    </a>
+  </div>
+
+  <div class="section-title">ATS Resume Scanner</div>
+  <div class="section-sub">
+    Paste your resume and any job description below. The engine extracts keywords
+    from both and shows you exactly what your resume is missing.
+  </div>
+
+  {# INFO BOX - explain ATS to the student #}
+  <div class="alert alert-info mb-3">
+    <strong>What is ATS?</strong> Applicant Tracking System - software companies use
+    to auto-filter resumes before a person reads them. Resumes that lack the keywords in the job description can be filtered out.
+    Your resume needs to contain the right keywords to pass. This tool tells you which
+    keywords are missing and gives you ready-to-paste sentences to add them.
+  </div>
+
+  {# THE ATS FORM #}
+  <div class="grid-2 mb-3">
+
+    {# Resume Input #}
+    <div class="form-group">
+      <label class="form-label">
+        <i class="ti ti-file-text"></i> Your Resume (paste as plain text)
+      </label>
+      <textarea id="resume-text" class="form-textarea"
+                rows="14"
+                placeholder="Paste your full resume text here...
+
+Example:
+Riya Sharma
+BSc Data Science, XYZ College
+
+Skills: Python, Excel, Data Analysis, SQL basics
+Projects: Built a sales dashboard using Excel pivot tables
+Education: BSc Data Science (SY) - 8.2 CGPA
+Certifications: Google Data Analytics Certificate"></textarea>
+    </div>
+
+    {# Job Description Input #}
+    <div class="form-group">
+      <label class="form-label">
+        <i class="ti ti-briefcase"></i> Job Description (paste from LinkedIn / Naukri)
+      </label>
+      <textarea id="jd-text" class="form-textarea"
+                rows="14"
+                placeholder="Paste the job description here...
+
+Example:
+Data Analyst - ABC Company
+
+We are looking for a Data Analyst with:
+- Proficiency in Python and Pandas for data manipulation
+- Strong SQL skills including JOINs and subqueries
+- Experience with data visualisation tools (Power BI or Tableau)
+- Knowledge of statistical analysis and data mining
+- Ability to communicate insights to non-technical stakeholders
+- Experience building dashboards and automated reports"></textarea>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;margin-bottom:2rem">
+    <button onclick="runATS()" class="btn btn-primary btn-lg" id="scan-btn">
+      <i class="ti ti-search"></i> Scan Resume Against Job Description
+    </button>
+  </div>
+
+  {# RESULTS SECTION - hidden until scan runs #}
+  <div id="results" style="display:none">
+
+    {# ATS Score #}
+    <div class="card mb-2 text-center">
+      <div style="font-size:13px;color:var(--text-2);text-transform:uppercase;
+                  letter-spacing:.06em;font-weight:600;margin-bottom:10px">
+        ATS Match Score
+      </div>
+      <div id="ats-score-num" class="score-number" style="color:#4F46E5">0%</div>
+      <div id="ats-score-label" class="score-label" style="margin-top:6px"></div>
+      <div id="ats-score-msg" class="text-muted mt-1" style="font-size:13px"></div>
+    </div>
+
+    {# Three keyword lists #}
+    <div class="grid-3 mb-2">
+
+      {# Matched (green) #}
+      <div class="card card-sm">
+        <div style="font-weight:600;font-size:14px;margin-bottom:10px;
+                    color:var(--green);display:flex;align-items:center;gap:6px">
+          <i class="ti ti-check-circle"></i>
+          Keywords You Have
+        </div>
+        <div id="matched-list" style="font-size:13px;line-height:2"></div>
+      </div>
+
+      {# Missing (red) - ACTION ITEMS #}
+      <div class="card card-sm" style="border-color:var(--red)">
+        <div style="font-weight:600;font-size:14px;margin-bottom:10px;
+                    color:var(--red);display:flex;align-items:center;gap:6px">
+          <i class="ti ti-x-circle"></i>
+          Missing Keywords
+          <span style="font-size:11px;font-weight:400;color:var(--text-2)">
+            - add these
+          </span>
+        </div>
+        <div id="missing-list" style="font-size:13px;line-height:2"></div>
+      </div>
+
+      {# Irrelevant (grey) #}
+      <div class="card card-sm">
+        <div style="font-weight:600;font-size:14px;margin-bottom:10px;
+                    color:var(--muted);display:flex;align-items:center;gap:6px">
+          <i class="ti ti-minus-circle"></i>
+          Not in Job Description
+        </div>
+        <div id="irrelevant-list" style="font-size:13px;line-height:2"></div>
+      </div>
+
+    </div>
+
+    {# Resume Improvement Suggestions #}
+    <div class="card mb-3">
+      <div style="font-weight:600;font-size:15px;margin-bottom:4px;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-pencil" style="color:var(--indigo)"></i>
+        Ready-to-Paste Resume Improvements
+      </div>
+      <div class="text-muted mb-2" style="font-size:13px">
+        For each missing keyword, here is a complete sentence you can
+        copy directly into your resume.
+      </div>
+      <div id="suggestions-list"></div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+// ============================================================
+// ATS ENGINE - runs entirely in the browser using JavaScript
+// 
+// How it works (kindergarten version):
+// 1. Get the resume text and job description text
+// 2. Split both into individual words
+// 3. Remove common useless words (stopwords)
+// 4. Find which job words appear in the resume
+// 5. Show matched (green), missing (red), irrelevant (grey)
+// ============================================================
+
+// STOPWORDS - common English words we ignore
+// They carry no meaning for skill matching
+const STOPWORDS = new Set([
+  'a','an','the','and','or','but','in','on','at','to','for',
+  'of','with','by','from','is','are','was','were','be','been',
+  'have','has','had','do','does','did','will','would','could',
+  'should','may','might','shall','can','not','no','nor',
+  'we','i','you','he','she','it','they','our','your','their',
+  'this','that','these','those','as','if','then','than','so',
+  'also','both','each','few','more','most','other','some',
+  'such','into','through','during','before','after','above',
+  'below','between','out','off','over','under','again','further',
+  'once','here','there','when','where','why','how','all','any',
+  'both','each','looking','candidates','role','position','team',
+  'company','work','experience','years','strong','good','ability',
+  'knowledge','skills','including','required','preferred','plus',
+  'using','use','used','build','built','create','make','ensure',
+  'support','provide','manage','develop','implement'
+]);
+
+// SUGGESTIONS - ready-to-paste sentences for common keywords
+// When a keyword is missing from the resume, we show this sentence
+const SUGGESTIONS = {
+  'python':         'Developed data analysis and automation scripts using Python, including data cleaning with Pandas and visualisation with Matplotlib.',
+  'sql':            'Designed and queried relational databases using SQL, including complex JOINs, subqueries, GROUP BY aggregations, and window functions.',
+  'pandas':         'Used Python Pandas library for structured data manipulation, cleaning, filtering, and transformation of large datasets.',
+  'power bi':       'Built interactive dashboards and reports using Microsoft Power BI to visualise KPIs and business trends for stakeholders.',
+  'machine learning': 'Applied machine learning algorithms including Linear Regression and classification models using scikit-learn for predictive analytics.',
+  'tableau':        'Created interactive data visualisation dashboards using Tableau to communicate insights to non-technical stakeholders.',
+  'excel':          'Used Microsoft Excel extensively - VLOOKUP, pivot tables, dynamic charts, and conditional formatting for data reporting.',
+  'statistics':     'Applied statistical methods including descriptive statistics, hypothesis testing, and probability distributions for data analysis.',
+  'data mining':    'Performed data mining tasks including pattern recognition, clustering, and association rule mining to extract actionable insights.',
+  'data analysis':  'Conducted end-to-end data analysis - data collection, cleaning, exploration, modelling, and presentation of findings.',
+  'communication':  'Effectively communicated complex data insights to non-technical stakeholders through presentations and written reports.',
+  'numpy':          'Used NumPy for numerical computing, array operations, and matrix manipulations in Python-based data projects.',
+  'hadoop':         'Familiar with Hadoop ecosystem including HDFS for distributed data storage and MapReduce for large-scale data processing.',
+  'spark':          'Knowledgeable in Apache Spark for in-memory distributed data processing and big data analytics pipelines.',
+  'dashboard':      'Designed and deployed interactive analytics dashboards that updated in real time from live database sources.',
+  'visualisation':  'Translated raw data into clear visual stories using charts, graphs, and dashboards tailored to the audience.',
+  'mysql':          'Worked with MySQL relational databases - schema design, indexing, query optimisation, and stored procedures.',
+  'mongodb':        'Used MongoDB NoSQL database for storing and querying semi-structured data in document format.',
+  'git':            'Used Git for version control and GitHub for collaborative code management and project documentation.',
+  'api':            'Built and consumed RESTful APIs using Python FastAPI and the Requests library to connect frontend and backend systems.',
+  'deep learning':  'Explored deep learning concepts including neural networks, CNNs, and model training using TensorFlow and Keras.',
+  'nlp':            'Applied Natural Language Processing techniques including tokenisation, stopword removal, and text classification using NLTK.',
+};
+
+function tokenise(text) {
+  /**
+   * Splits text into clean, lowercase words.
+   * Removes punctuation and short/stop words.
+   * Returns a Set (unique words only).
+   */
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')   // replace non-letters with space
+    .split(/\s+/)                  // split on whitespace
+    .filter(w => w.length > 2 && !STOPWORDS.has(w));  // filter short + stop
+  return new Set(words);
+}
+
+function extractPhrases(text) {
+  /**
+   * Also checks for two-word phrases like "power bi",
+   * "machine learning", "data mining" because single-word
+   * tokenisation would miss compound skills.
+   */
+  const lower = text.toLowerCase();
+  const found = new Set();
+  const bigrams = [
+    'power bi', 'machine learning', 'data mining', 'data analysis',
+    'deep learning', 'natural language', 'big data', 'data science',
+    'data engineer', 'data analyst', 'business analyst', 'soft skills',
+    'problem solving', 'critical thinking', 'time series', 'random forest',
+    'logistic regression', 'linear regression', 'computer vision'
+  ];
+  bigrams.forEach(phrase => {
+    if (lower.includes(phrase)) found.add(phrase);
+  });
+  return found;
+}
+
+function runATS() {
+  const resumeText = document.getElementById('resume-text').value.trim();
+  const jdText     = document.getElementById('jd-text').value.trim();
+
+  if (!resumeText || !jdText) {
+    alert('Please paste both your resume AND the job description before scanning.');
+    return;
+  }
+
+  // Step 1: Tokenise both texts
+  const resumeWords = tokenise(resumeText);
+  const jdWords     = tokenise(jdText);
+  const resumePhrases = extractPhrases(resumeText);
+  const jdPhrases     = extractPhrases(jdText);
+
+  // Add phrases into the sets
+  jdPhrases.forEach(p => jdWords.add(p));
+  resumePhrases.forEach(p => resumeWords.add(p));
+
+  // Step 2: Calculate matched / missing / irrelevant
+  const matched    = [...jdWords].filter(w => resumeWords.has(w));
+  const missing    = [...jdWords].filter(w => !resumeWords.has(w));
+  const irrelevant = [...resumeWords].filter(w => !jdWords.has(w));
+
+  // Step 3: Calculate ATS score
+  const score = jdWords.size > 0
+    ? Math.round((matched.length / jdWords.size) * 100)
+    : 0;
+
+  // Step 4: Show the results section
+  document.getElementById('results').style.display = 'block';
+
+  // Step 5: Display score
+  const scoreEl = document.getElementById('ats-score-num');
+  const labelEl = document.getElementById('ats-score-label');
+  const msgEl   = document.getElementById('ats-score-msg');
+
+  scoreEl.textContent = score + '%';
+
+  if (score >= 75) {
+    scoreEl.style.color  = '#22C55E';
+    labelEl.textContent  = '✓ Likely to pass ATS';
+    labelEl.className    = 'score-label ready';
+    msgEl.textContent    = 'Great match! Your resume has most of the required keywords. Apply with confidence.';
+  } else if (score >= 50) {
+    scoreEl.style.color  = '#F59E0B';
+    labelEl.textContent  = '⚠ May be filtered out';
+    labelEl.className    = 'score-label warning';
+    msgEl.textContent    = 'Moderate match. Add the missing keywords below to improve your chances significantly.';
+  } else {
+    scoreEl.style.color  = '#EF4444';
+    labelEl.textContent  = '✗ Likely to be rejected';
+    labelEl.className    = 'score-label critical';
+    msgEl.textContent    = 'Low match. Use the suggestions below to rewrite your resume before applying.';
+  }
+
+  // Step 6: Show keyword lists as coloured badges
+  const makeBadge = (word, colour) =>
+    `<span style="display:inline-block;background:${colour}22;
+      color:${colour};border:1px solid ${colour}44;
+      border-radius:99px;padding:2px 10px;font-size:12px;
+      margin:2px 3px;font-weight:500">${word}</span>`;
+
+  document.getElementById('matched-list').innerHTML =
+    matched.length ? matched.map(w => makeBadge(w, '#22C55E')).join('') : '<span class="text-muted">None found</span>';
+
+  document.getElementById('missing-list').innerHTML =
+    missing.length ? missing.map(w => makeBadge(w, '#EF4444')).join('') : '<span style="color:var(--green)">All covered! 🎉</span>';
+
+  document.getElementById('irrelevant-list').innerHTML =
+    irrelevant.slice(0, 15).map(w => makeBadge(w, '#64748B')).join('') +
+    (irrelevant.length > 15 ? `<br><span class="text-muted" style="font-size:12px">+${irrelevant.length - 15} more</span>` : '');
+
+  // Step 7: Generate improvement suggestions for missing keywords
+  const suggestionsEl = document.getElementById('suggestions-list');
+  const suggestItems  = missing.filter(w => SUGGESTIONS[w]);
+
+  if (suggestItems.length === 0) {
+    suggestionsEl.innerHTML = `
+      <div class="alert alert-success">
+        Your resume already uses good keyword coverage for the skills we have suggestions for.
+        Review the missing keywords list above and add context sentences for any that are relevant.
+      </div>`;
+  } else {
+    suggestionsEl.innerHTML = suggestItems.slice(0, 6).map(keyword => `
+      <div class="action-card" style="margin-bottom:10px">
+        <div class="action-skill">
+          <span style="text-transform:capitalize">${keyword}</span>
+          <span class="badge badge-critical" style="font-size:10px">Missing</span>
+        </div>
+        <div class="action-tip" style="margin-bottom:8px">${SUGGESTIONS[keyword]}</div>
+        <button data-keyword="${keyword}" onclick="copyText(this)"
+                class="btn btn-outline" style="font-size:12px;padding:4px 12px">
+          <i class="ti ti-copy"></i> Copy sentence
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // Scroll to results
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyText(btn) {
+  const text = SUGGESTIONS[btn.dataset.keyword];
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-copy"></i> Copy sentence';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+</script>
+{% endblock %}

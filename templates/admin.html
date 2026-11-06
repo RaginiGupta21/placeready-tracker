@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+{# Placement-cell view. `students` is already sorted best-first by main.py.
+   Each student has s.status for python/sql/dsa/communication: good, warning or critical,
+   worked out against THAT student's target role (see analytics.skill_status). #}
+{% set col = {'good': '#22C55E', 'warning': '#F59E0B', 'critical': '#EF4444'} %}
+<div class="page">
+
+  <div class="section-title">Placement Cell Dashboard</div>
+  <div class="section-sub">All students ranked by readiness score. Use this to identify who needs help before placement season begins.</div>
+
+  {% if students %}
+  {% set total    = students | length %}
+  {% set ready    = students | selectattr('readiness_score', 'ge', 70) | list | length %}
+  {% set warning  = students | selectattr('readiness_score', 'ge', 40) | selectattr('readiness_score', 'lt', 70) | list | length %}
+  {% set critical = students | selectattr('readiness_score', 'lt', 40) | list | length %}
+
+  <div class="stats-row mb-3">
+    <div class="stat-card"><div class="stat-value">{{ total }}</div><div class="stat-label">Total Students</div></div>
+    <div class="stat-card" style="border-color:var(--green)"><div class="stat-value" style="color:var(--green)">{{ ready }}</div><div class="stat-label">Ready (&ge;70%)</div></div>
+    <div class="stat-card" style="border-color:var(--yellow)"><div class="stat-value" style="color:var(--yellow)">{{ warning }}</div><div class="stat-label">Warning (40-70%)</div></div>
+    <div class="stat-card" style="border-color:var(--red)"><div class="stat-value" style="color:var(--red)">{{ critical }}</div><div class="stat-label">Critical (&lt;40%)</div></div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border)">
+      <div style="font-weight:600;font-size:15px"><i class="ti ti-users" style="color:var(--indigo)"></i> All Students, Ranked by Readiness</div>
+      <div class="text-muted" style="font-size:12px;margin-top:4px">Skill colours compare each student with the benchmark for their own target role: green meets it, amber is one level short, red is two or more short.</div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Name</th><th>Target Role</th>
+            <th>Python</th><th>SQL</th><th>DSA</th><th>Communication</th>
+            <th>Readiness</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          {% set sc = s.readiness_score %}
+          <tr>
+            <td style="color:var(--text-2);font-weight:500">#{{ loop.index }}</td>
+            <td style="color:var(--text);font-weight:500">{{ s.name }}</td>
+            <td>{{ s.target_role }}</td>
+            <td style="text-align:center;color:{{ col[s.status.python] }}">{{ s.python }}/5</td>
+            <td style="text-align:center;color:{{ col[s.status.sql] }}">{{ s.sql }}/5</td>
+            <td style="text-align:center;color:{{ col[s.status.dsa] }}">{{ s.dsa }}/5</td>
+            <td style="text-align:center;color:{{ col[s.status.communication] }}">{{ s.communication }}/5</td>
+            <td style="text-align:center;font-weight:600;color:{{ '#22C55E' if sc >= 70 else ('#F59E0B' if sc >= 40 else '#EF4444') }}">{{ sc }}%</td>
+            <td>
+              {% if sc >= 70 %}<span class="badge badge-good">Ready</span>
+              {% elif sc >= 40 %}<span class="badge badge-warning">Warning</span>
+              {% else %}<span class="badge badge-critical">Critical</span>{% endif %}
+            </td>
+            <td><a href="/dashboard/{{ s.id }}" class="btn btn-outline" style="font-size:12px;padding:4px 12px">View</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card text-center" style="padding:3rem">
+    <div style="font-size:48px;margin-bottom:12px">📋</div>
+    <div style="font-weight:600;font-size:16px;margin-bottom:6px">No students yet</div>
+    <div class="text-muted mb-2" style="font-size:14px">Students appear here after they fill in their skill profile.</div>
+    <a href="/profile" class="btn btn-primary"><i class="ti ti-plus"></i> Add First Student Profile</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

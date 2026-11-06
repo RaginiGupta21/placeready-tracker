@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local database (contains your test students; it is recreated on first run)
+placement.db
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

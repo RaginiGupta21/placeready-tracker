@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}My Skill Profile{% endblock %}
+
+{% block content %}
+{#
+  profile.html - THE SKILL PROFILE FORM
+  This is where students rate their skills.
+  
+  Each skill has a SLIDER from 1 to 5.
+  As the student drags the slider, the number updates live
+  using JavaScript (the oninput event).
+  
+  When the student clicks SUBMIT, the form sends all data
+  to the /submit-profile route (see main.py) using the POST method.
+#}
+<div class="page">
+
+  <div class="mb-3">
+    <a href="/" class="btn btn-outline" style="font-size:13px;padding:6px 14px">
+      <i class="ti ti-arrow-left"></i> Back
+    </a>
+  </div>
+
+  <div class="section-title">Build your skill profile</div>
+  <div class="section-sub">
+    Rate yourself honestly on each skill from 1 (beginner) to 5 (expert).
+    Honest ratings give you the most accurate gap analysis.
+  </div>
+
+  {# THE FORM - action="/submit-profile" means "send data to this URL" #}
+  {# method="post" means the data is sent securely in the request body #}
+  <form action="/submit-profile" method="post">
+
+    {# ======= SECTION 1: BASIC INFO ======= #}
+    <div class="card mb-2">
+      <div style="font-weight:600;font-size:15px;margin-bottom:1.25rem;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-user" style="color:var(--indigo)"></i>
+        Basic Information
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="name" class="form-input"
+                 placeholder="e.g. Riya Sharma" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Branch / Course</label>
+          <input type="text" name="branch" class="form-input"
+                 placeholder="e.g. BSc Data Science" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Current Year</label>
+          <select name="year" class="form-select" required>
+            <option value="">Select year</option>
+            <option value="FY">First Year (FY)</option>
+            <option value="SY" selected>Second Year (SY)</option>
+            <option value="TY">Third Year (TY)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Target Role</label>
+          <select name="target_role" class="form-select" required>
+            <option value="">Select your target role</option>
+            {% for role in roles %}
+            <option value="{{ role }}">{{ role }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {# ======= SECTION 2: TECHNICAL SKILLS ======= #}
+    <div class="card mb-2">
+      <div style="font-weight:600;font-size:15px;margin-bottom:4px;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-code" style="color:var(--indigo)"></i>
+        Technical Skills
+      </div>
+      <div class="text-muted mb-2" style="font-size:13px">
+        1 = I have heard of it &nbsp;·&nbsp;
+        2 = I understand the basics &nbsp;·&nbsp;
+        3 = I can use it with some help &nbsp;·&nbsp;
+        4 = I am comfortable &nbsp;·&nbsp;
+        5 = I can teach others
+      </div>
+
+      {# SKILL SLIDER MACRO
+           Each slider:
+           - name="skill_name"   → FastAPI reads this when the form submits
+           - min="1" max="5"     → range of the slider
+           - value="1"           → default starting position
+           - oninput="..."       → JavaScript that updates the number live
+      #}
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-brand-python"></i> Python</span>
+          <span class="skill-value" id="val-python">1</span>
+        </div>
+        <input type="range" name="python" min="1" max="5" value="1"
+               oninput="document.getElementById('val-python').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-database"></i> SQL</span>
+          <span class="skill-value" id="val-sql">1</span>
+        </div>
+        <input type="range" name="sql" min="1" max="5" value="1"
+               oninput="document.getElementById('val-sql').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-binary-tree"></i> DSA (Data Structures & Algorithms)</span>
+          <span class="skill-value" id="val-dsa">1</span>
+        </div>
+        <input type="range" name="dsa" min="1" max="5" value="1"
+               oninput="document.getElementById('val-dsa').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-table"></i> Excel</span>
+          <span class="skill-value" id="val-excel">1</span>
+        </div>
+        <input type="range" name="excel" min="1" max="5" value="1"
+               oninput="document.getElementById('val-excel').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-chart-bar"></i> Power BI</span>
+          <span class="skill-value" id="val-powerbi">1</span>
+        </div>
+        <input type="range" name="powerbi" min="1" max="5" value="1"
+               oninput="document.getElementById('val-powerbi').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-brain"></i> ML Basics</span>
+          <span class="skill-value" id="val-ml">1</span>
+        </div>
+        <input type="range" name="ml" min="1" max="5" value="1"
+               oninput="document.getElementById('val-ml').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-math"></i> Statistics</span>
+          <span class="skill-value" id="val-statistics">1</span>
+        </div>
+        <input type="range" name="statistics" min="1" max="5" value="1"
+               oninput="document.getElementById('val-statistics').textContent=this.value">
+      </div>
+
+    </div>
+
+    {# ======= SECTION 3: SOFT SKILLS ======= #}
+    <div class="card mb-2">
+      <div style="font-weight:600;font-size:15px;margin-bottom:1.25rem;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-circle" style="color:var(--indigo)"></i>
+        Soft Skills & Domain Knowledge
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-messages"></i> Communication</span>
+          <span class="skill-value" id="val-communication">1</span>
+        </div>
+        <input type="range" name="communication" min="1" max="5" value="1"
+               oninput="document.getElementById('val-communication').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-puzzle"></i> Aptitude</span>
+          <span class="skill-value" id="val-aptitude">1</span>
+        </div>
+        <input type="range" name="aptitude" min="1" max="5" value="1"
+               oninput="document.getElementById('val-aptitude').textContent=this.value">
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name"><i class="ti ti-books"></i> Domain Knowledge</span>
+          <span class="skill-value" id="val-domain">1</span>
+        </div>
+        <input type="range" name="domain" min="1" max="5" value="1"
+               oninput="document.getElementById('val-domain').textContent=this.value">
+      </div>
+    </div>
+
+    {# ======= SECTION 4: WEEKLY ACTIVITY ======= #}
+    <div class="card mb-3">
+      <div style="font-weight:600;font-size:15px;margin-bottom:4px;
+                  display:flex;align-items:center;gap:8px">
+        <i class="ti ti-calendar-check" style="color:var(--indigo)"></i>
+        This Week's Activity
+      </div>
+      <div class="text-muted mb-2" style="font-size:13px">
+        What did you actually DO this week? Activity score = 40% of your readiness score.
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-code"></i> Coding problems solved
+          </label>
+          <input type="number" name="problems" class="form-input"
+                 min="0" max="100" value="0" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-microphone"></i> Mock interviews done
+          </label>
+          <input type="number" name="mocks" class="form-input"
+                 min="0" max="10" value="0" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-folder-plus"></i> New projects added
+          </label>
+          <input type="number" name="projects" class="form-input"
+                 min="0" max="5" value="0" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i class="ti ti-certificate"></i> Online courses completed
+          </label>
+          <input type="number" name="courses" class="form-input"
+                 min="0" max="5" value="0" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    {# ======= SUBMIT BUTTON ======= #}
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="ti ti-calculator"></i>
+        Calculate My Readiness Score
+      </button>
+      <div class="text-muted mt-1" style="font-size:12px">
+        Your data is saved locally. Nothing is sent to any external server.
+      </div>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
