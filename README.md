@@ -8,8 +8,6 @@ Built as a Semester 3 industry project (BSc Data Science and Business Analytics)
 
 ![Student Dashboard](screenshots/Student\_dashboard.png)
 
-![ATS Scanner](screenshots/ATS\_scanner.png)
-
 ![Admin Dashboard](screenshots/Admin\_dashboard.png)
 
 ![Student Profile](screenshots/Profile.png)
