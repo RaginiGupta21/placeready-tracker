@@ -4,17 +4,17 @@ A web app that helps students see how ready they are for campus placements, whic
 
 Built as a Semester 3 industry project (BSc Data Science and Business Analytics).
 
-> !\[Home Page](screenshots/Home.png)
+!\[Home Page](screenshots/Home.png)
 
-> !\[Student Dashboard](screenshots/Student\_dashboard.png)
+!\[Student Dashboard](screenshots/Student\_dashboard.png)
 
-> !\[ATS Scanner](screenshots/ATS\_scanner.png)
+!\[ATS Scanner](screenshots/ATS\_scanner.png)
 
-> !\[Admin Dashboard](screenshots/Admin\_dashboard.png)
+!\[Admin Dashboard](screenshots/Admin\_dashboard.png)
 
-> !\[Student Profile](screenshots/Profile.png)
+!\[Student Profile](screenshots/Profile.png)
 
-> !\[API Documentation](screenshots/API\_document.png)
+!\[API Documentation](screenshots/API\_document.png)
 
 ## Features
 
