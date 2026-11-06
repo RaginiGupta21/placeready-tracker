@@ -14,8 +14,6 @@ Built as a Semester 3 industry project (BSc Data Science and Business Analytics)
 
 ![Student Profile](screenshots/Profile.png)
 
-![API Documentation](screenshots/API\_document.png)
-
 ## Features
 
 * **Readiness score (0-100):** 60 points from ten self-rated skills plus 40 points from weekly activity.
