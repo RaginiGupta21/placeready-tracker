@@ -4,6 +4,12 @@ A web app that helps students see how ready they are for campus placements, whic
 
 Built as a Semester 3 industry project (BSc Data Science and Business Analytics).
 
+## Live demo
+
+**[Open PlaceReady](https://placeready-tracker.onrender.com/)**
+
+Hosted on a free tier, so the first visit after a quiet period can take about a minute to wake up. Demo data may be reset at any time, so please use fake names only. There is no login.
+
 ![Home Page](screenshots/Home.png)
 
 ![Student Dashboard](screenshots/Student\_dashboard.png)
@@ -74,8 +80,7 @@ The ten numbers are the level (1-5) the role expects for: Python, SQL, DSA, Exce
 * **No machine-learning model.** The score is a transparent formula. A prediction model needs real historical placement data, which this project does not have.
 * **ATS scan history is not saved.** The `ats\_scans` table exists for future use, but the browser-based scanner does not write to it yet.
 * **ATS matching is simple keyword overlap** with an English stopword list. It is a teaching model of how keyword filters work, not a copy of any real ATS product. Multi-word skills (for example "power bi") are counted both as a phrase and as separate words.
-* **Local development setup.** It runs on SQLite with the Uvicorn dev server and auto-reload; it is not configured for production deployment.
-
+- **Free-tier demo hosting.** The live demo runs on a free tier with a SQLite file, so it can sleep and its data can be reset. It is not set up for production use.
 ## Roadmap
 
 User accounts and login, saving ATS scans, PDF resume upload, and a prediction model trained on real placement data.
