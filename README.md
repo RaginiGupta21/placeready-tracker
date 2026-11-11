@@ -5,7 +5,7 @@ A web app that helps students see how ready they are for campus placements, whic
 Built as a Semester 3 industry project (BSc Data Science and Business Analytics).
 
 ## Live demo
-[![Live Demo on Render](https://img.shields.io/badge/Live%20Demo-Render-000000?style=for-the-badge&logo=render&logoColor=white)](https://YOUR-SERVICE.onrender.com)
+[![Live Demo on Render](https://img.shields.io/badge/Live%20Demo-Render-000000?style=for-the-badge&logo=render&logoColor=white)](https://placeready-tracker.onrender.com)
 
 *Free-tier hosting: the first visit after a quiet period can take about a minute to wake up. Demo data may be reset, so please use fake names only. There is no login.*
 
