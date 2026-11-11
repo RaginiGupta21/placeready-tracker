@@ -10,15 +10,19 @@ Built as a Semester 3 industry project (BSc Data Science and Business Analytics)
 *Free-tier hosting: the first visit after a quiet period can take about a minute to wake up. Demo data may be reset, so please use fake names only. There is no login.*
 
 # Home Page
+
 ![Home Page](screenshots/Home.png)
 
 # Student Dashboard
+
 ![Student Dashboard](screenshots/Student\_dashboard.png)
 
 # Admin Dashboard
+
 ![Admin Dashboard](screenshots/Admin\_dashboard.png)
 
 # Student Profile
+
 ![Student Profile](screenshots/Profile.png)
 
 ## Features
